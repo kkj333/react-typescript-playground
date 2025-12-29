@@ -1,11 +1,4 @@
-interface Weather {
-  city: string
-  temperature: number
-  condition: string
-  humidity: number
-  windSpeed: number
-  icon: string
-}
+import type { Weather } from './types'
 
 export const mockWeatherData: Record<string, Weather> = {
   tokyo: {

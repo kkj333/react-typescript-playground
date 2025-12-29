@@ -1,15 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import { searchWeather } from './mockData'
-
-interface Weather {
-  city: string
-  temperature: number
-  condition: string
-  humidity: number
-  windSpeed: number
-  icon: string
-}
+import type { Weather } from './types'
 
 function App() {
   const [weather, setWeather] = useState<Weather | null>(null)
@@ -33,7 +25,7 @@ function App() {
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch()
     }
@@ -50,7 +42,7 @@ function App() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           placeholder="都市名を入力..."
           className="search-input"
         />
@@ -88,14 +80,14 @@ function App() {
                 key={city}
                 className="city-button"
                 onClick={() => {
-                  setInput(city)
-                  setTimeout(() => {
-                    const result = searchWeather(city)
-                    if (result) {
-                      setWeather(result)
-                      setError('')
-                    }
-                  }, 0)
+                  const result = searchWeather(city)
+                  if (result) {
+                    setWeather(result)
+                    setError('')
+                  } else {
+                    setWeather(null)
+                    setError(`「${city}」は見つかりませんでした`)
+                  }
                 }}
               >
                 {city}
