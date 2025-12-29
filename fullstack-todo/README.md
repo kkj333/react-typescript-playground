@@ -41,11 +41,17 @@ fullstack-todo/
 │   ├── requirements.txt        # Python 依存関係
 │   └── README.md               # バックエンド ドキュメント
 │
-├── .devcontainer/              # Dev Container 設定
-│   ├── Dockerfile              # コンテナイメージ定義
-│   ├── docker-compose.yml      # コンテナ構成
+├── .devcontainer/              # 開発用 Dev Container 設定
+│   ├── Dockerfile              # 統合開発環境コンテナ
+│   ├── docker-compose.yml      # 開発用コンテナ構成
 │   ├── devcontainer.json       # VS Code 統合設定
 │   └── postCreateCommand.sh    # セットアップスクリプト
+│
+├── frontend/Dockerfile         # 本番用フロントエンド コンテナ
+├── backend/Dockerfile          # 本番用バックエンド コンテナ
+├── docker-compose.yml          # 本番用マルチコンテナ構成
+├── frontend/.dockerignore      # フロント Docker ビルド除外
+├── backend/.dockerignore       # バック Docker ビルド除外
 │
 └── README.md                   # このファイル
 ```
@@ -142,6 +148,60 @@ npm run dev
 - **フロントエンド**: http://localhost:5173
 - **バックエンド API**: http://localhost:8000/api/todos
 - **Swagger UI**: http://localhost:8000/docs
+
+## 本番環境デプロイ
+
+### Docker Compose を使用した本番デプロイ
+
+分離されたフロントエンド・バックエンド用の Dockerfile を使用:
+
+```bash
+# プロジェクトルートで実行
+docker-compose up -d
+
+# ログ確認
+docker-compose logs -f
+
+# 停止
+docker-compose down
+```
+
+#### 本番 docker-compose.yml の特徴
+
+- **マルチコンテナ構成**: フロントエンドとバックエンドを分離
+- **ヘルスチェック**: バックエンド API の定期監視
+- **依存関係管理**: フロントエンドはバックエンド起動後に起動
+- **軽量イメージ**: Alpine ベースイメージで最小化
+
+#### ビルド最適化
+
+- **マルチステージビルド**（フロント）
+  - ビルドステージで npm dependencies をインストール
+  - 本番イメージには `dist/` のみコピー
+  - イメージサイズを大幅削減
+
+- **.dockerignore ファイル**
+  - node_modules, venv, .git などを除外
+  - ビルド時間を高速化
+
+#### 本番アクセス
+
+- **フロントエンド**: http://localhost:5173
+- **バックエンド API**: http://localhost:8000/api/todos
+
+### 個別の Dockerfile
+
+#### frontend/Dockerfile
+
+- Node.js 20 Alpine ベース
+- npm ci で依存関係をロック
+- serve で本番サーバー実行
+
+#### backend/Dockerfile
+
+- Python 3.12 slim ベース
+- 軽量なシステムパッケージのみ
+- uvicorn で本番サーバー実行
 
 ## 機能
 
